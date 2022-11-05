@@ -21,7 +21,6 @@ class Region(models.Model):
     def __str__(self):
         return self.region_large
 
-
 class Place(models.Model):
     name = models.CharField(unique=True, max_length=30, null=False)
     description = models.TextField(null=True, default="")

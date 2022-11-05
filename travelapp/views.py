@@ -3,7 +3,8 @@ from .constants import CLIENT_ID, CLIENT_SECRET
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets, status
-from .models import Region, Place, User
+from .models import Region, Place
+from userapp.models import User
 from .serializers import RegionSerializer, PlaceSerializer
 import urllib.request
 import json
@@ -275,15 +276,17 @@ def recommend_place(request, type=None):
     # encode_type = 'json'
     # sort = 'sin'   # 관련도순
 
-    ##### 비로그인 유저 ######
-    personal_type = request.GET.get('person_type')
-    preference = request.GET.get('preference')
-
     ##### 로그인 유저 ######
     user = request.user
-    loginUser = User.objects.get('')
-    personal_type = user.personal_type
-    preference = user.preference
+
+    if user:
+        loginUser = User.objects.get(pk=user.id)
+        personal_type = loginUser.personal_type
+        preference = loginUser.preference
+    else:
+        ##### 비로그인 유저 ######
+        personal_type = request.GET.get('person_type')
+        preference = request.GET.get('preference')
 
     search_region = request.GET.get('name')
 
@@ -302,5 +305,6 @@ def recommend_place(request, type=None):
 
     print(response_dict)
 
-    
+    serializer = RegionSerializer(json.dumps(response_dict), many=True)
+    return Response(serializer.data)
 
