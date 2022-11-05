@@ -4,5 +4,5 @@ from . import views
 app_name = 'travelapp'
 
 urlpatterns = [
-    # path('', ),
+    # path('<int:pk>/get_region/', view=views.get_region, name='get_region'),
 ]
