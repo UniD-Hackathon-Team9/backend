@@ -7,7 +7,19 @@ from .models import Region, Place
 from userapp.models import User
 from .serializers import RegionSerializer, PlaceSerializer
 import urllib.request
+import random
 import json
+import ssl
+from django.http import JsonResponse
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
 
 # Create your views here.
 
@@ -74,31 +86,43 @@ def recommend_place(request, type=None):
         preference = loginUser.preference
     except:
         ##### 비로그인 유저 ######
-        personal_type = request.GET.get('person_type')
+        personal_type = request.GET.get('personalType')
         preference = request.GET.get('preference')
 
 
     ########### 추천 알고리즘 #################
 
     search_region = request.GET.get('name')
+    mypositions = [
+        [1,2],
+        [2,3],
+        [3,4],
+        [1,4]
+    ]
+    positions = mypositions[random.randrange(0, 4)] if personal_type == "b" else [random.randrange(2, 5)]
+    
 
-    search_food = search_region + (" 음식점")
-    search_food = urllib.parse.quote(search_food)
-    search_cafe =  search_region + (" 카페")
-    search_cafe = urllib.parse.quote(search_cafe)
-    search_spot = search_region + (" 명소")
-    search_spot = urllib.parse.quote(search_spot)
+    # search_food = search_region + (" 음식점")
+    # search_food = urllib.parse.quote(search_food)
+    # search_cafe =  search_region + (" 카페")
+    # search_cafe = urllib.parse.quote(search_cafe)
+    # search_spot = search_region + (" 명소")
+    # search_spot = urllib.parse.quote(search_spot)
+    
+    place = Place.objects.raw(f'SELECT * FROM travelapp_place;')[0]
+
     
     # print("response = " + str(response))
     response_dict = {}
-    response_dict.update(get_place_info(search_food))
-    response_dict.update(get_place_info(search_cafe))
-    response_dict.update(get_place_info(search_spot))
+    # response_dict.update(get_place_info(search_food))
+    # response_dict.update(get_place_info(search_cafe))
+    # response_dict.update(get_place_info(search_spot))
 
-    print(response_dict)
+    print(place)
 
-    serializer = RegionSerializer(json.dumps(response_dict), many=True)
-    return Response(serializer.data)
+    # serializer = RegionSerializer(json.dumps(response_dict), many=True)
+    # return Response(serializer.data)
+    return JsonResponse({'foo': 'bar'})
 
 
 
