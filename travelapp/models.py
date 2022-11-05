@@ -9,8 +9,9 @@ TRAVEL_TYPE = (
 )
 
 PLACE_TYPE = (
-    ('RESTAURANT', 'RESTAURANT'),
+    ('FOOD', 'FOOD'),
     ('CAFE', 'CAFE'),
+    ('SPOT', 'SPOT')
 )
 
 # Create your models here.
@@ -23,8 +24,9 @@ class Region(models.Model):
 
 class Place(models.Model):
     name = models.CharField(unique=True, max_length=30, null=False)
-    description = models.TextField(null=True, default="")
+    placeType = models.CharField(choices=PLACE_TYPE, max_length=10, default='FOOD')
     latitude = models.IntegerField(null=False)
+    address = models.TextField(null=True, default="")
     longtitude = models.IntegerField(null=False)
     region = models.ForeignKey(Region, verbose_name="region", on_delete=models.CASCADE)
 

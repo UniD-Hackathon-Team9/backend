@@ -11,6 +11,8 @@ import random
 import json
 import ssl
 from django.http import JsonResponse
+from django.core import serializers
+
 
 try:
     _create_unverified_https_context = ssl._create_unverified_context
@@ -60,6 +62,7 @@ def get_place_info(place):
             Place.objects.create(
                 name=place['title'],
                 description = place['description'],
+                address = dict_place[i]['address'],
                 latitude = dict_place[i]['mapx'],
                 longtitude = dict_place[i]['mapy'],
                 region = region_id
@@ -109,7 +112,7 @@ def recommend_place(request, type=None):
     # search_spot = search_region + (" 명소")
     # search_spot = urllib.parse.quote(search_spot)
     
-    place = Place.objects.raw(f'SELECT * FROM travelapp_place;')[0]
+    place = Place.objects.raw(f'SELECT * FROM travelapp_place LEFT JOIN travelapp_region ON travelapp_place.region_id=travelapp_region.id;')
 
     
     # print("response = " + str(response))
@@ -118,11 +121,9 @@ def recommend_place(request, type=None):
     # response_dict.update(get_place_info(search_cafe))
     # response_dict.update(get_place_info(search_spot))
 
-    print(place)
-
     # serializer = RegionSerializer(json.dumps(response_dict), many=True)
     # return Response(serializer.data)
-    return JsonResponse({'foo': 'bar'})
+    return JsonResponse(serializers.serialize('json', place), safe=False)
 
 
 
@@ -334,6 +335,7 @@ def get_place_food(request, type=None):
             Place.objects.create(
                 name=dict_food[i]['title'],
                 description = dict_food[i]['description'],
+                address = dict_food[i]['address'],
                 latitude = dict_food[i]['mapx'],
                 longtitude = dict_food[i]['mapy'],
                 region = region_id
