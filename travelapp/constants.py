@@ -1,0 +1,8 @@
+
+# 네이버 Map API
+# X-NCP-APIGW-API-KEY='CNQSofjNTeOFHOoODDAvpk0QNs9a2MXZh80kFXbM'
+# X-NCP-APIGW-API-KEY-ID='9pwchirpzc'
+
+# 네이버 검색 API
+CLIENT_ID='rcpSRqFxxhEfRkZjhZiy'
+CLIENT_SECRET='0eERkQtJuE'
