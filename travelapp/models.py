@@ -15,15 +15,15 @@ PLACE_TYPE = (
 
 # Create your models here.
 class Region(models.Model):
-    region_small = models.CharField(max_length=20, null=False)   # address [1]
+    region_small = models.CharField(unique=True, max_length=20, null=False)   # address [1]
     region_large = models.CharField(max_length=20, null=False)   # address [0]
 
     def __str__(self):
-        return self.name
+        return self.region_large
 
 
 class Place(models.Model):
-    name = models.CharField(max_length=30, null=False)
+    name = models.CharField(unique=True, max_length=30, null=False)
     description = models.TextField(null=True, default="")
     latitude = models.IntegerField(null=False)
     longtitude = models.IntegerField(null=False)

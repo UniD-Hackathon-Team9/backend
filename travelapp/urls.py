@@ -14,7 +14,7 @@ urlpatterns = [
     # path('', include(router.urls)),
     # path('api/regions', DataListAPI.as_view()),
     # path('get_region/<int:pk>', RegionAPI.as_view()),
-    url(r'^$', views.get_place_food),
+    url(r'^$', views.recommend_place),
     url(r'^(?P<pk>[0-9]+)/$', views.region_detail),
 ]
 
