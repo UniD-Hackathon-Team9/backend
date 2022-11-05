@@ -3,5 +3,4 @@ from .models import *
 
 # Register your models here.
 admin.site.register(Place)
-admin.site.register(PlaceType)
 admin.site.register(Region)
