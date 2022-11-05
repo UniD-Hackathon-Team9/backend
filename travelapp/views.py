@@ -3,7 +3,7 @@ from .constants import CLIENT_ID, CLIENT_SECRET
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets, status
-from .models import Region, Place
+from .models import Region, Place, User
 from .serializers import RegionSerializer, PlaceSerializer
 import urllib.request
 import json
@@ -209,17 +209,98 @@ def get_place_food(request, type=None):
             food['address'] = dict_food[i]['address']
             food_list.update(food)
             food = {}
-            
-            print(dict_food[i]['address'][1], dict_food[i]['address'][2])
-            region_id = Region.objects.filter(region_large=dict_food[i]['address'][1], region_small=dict_food[i]['address'][2])
 
+            print('dd;' + list((dict_food[i]['address']).split(" "))[1], list((dict_food[i]['address']).split(" "))[2])
+            region_id = Region.objects.get(region_large=list((dict_food[i]['address']).split(" "))[1], region_small=list((dict_food[i]['address']).split(" "))[2])
+            print(region_id)
             Place.objects.create(
                 name=dict_food[i]['title'],
                 description = dict_food[i]['description'],
                 latitude = dict_food[i]['mapx'],
                 longtitude = dict_food[i]['mapy'],
-                address = region_id
+                region = region_id
             )
     
     else:
         print("Error Code:" + rescode)
+
+def get_place_info(place):
+    max_display = 5   # 20개까지만 받아오기
+
+    url = "https://openapi.naver.com/v1/search/local?query=" + place + "&display=" + str(int(max_display))  # JSON 결과 저장
+    
+    req = urllib.request.Request(url)
+    req.add_header("X-Naver-Client-Id", CLIENT_ID)
+    req.add_header("X-Naver-Client-Secret", CLIENT_SECRET)
+    response = urllib.request.urlopen(req)
+
+    rescode = response.getcode()
+
+
+    if rescode==200:
+        response_body = response.read()
+        # print(response_body)
+        result = json.loads(response_body.decode('UTF-8'))
+        print("result = " + str(result['items']))
+        dict_place = result['items']
+        place_list = {}
+        place = {}
+        for i in range(len(dict_place)):
+            place['title'] = dict_place[i]['title']
+            place['address'] = dict_place[i]['address']
+            place['description'] = dict_place[i]['category']
+            place_list.update(place)
+
+            print('dd;' + list((dict_place[i]['address']).split(" "))[1], list((dict_place[i]['address']).split(" "))[2])
+            region_id = Region.objects.get(region_large=list((dict_place[i]['address']).split(" "))[1], region_small=list((dict_place[i]['address']).split(" "))[2])
+            print(region_id)
+            Place.objects.create(
+                name=place['title'],
+                description = place['description'],
+                latitude = dict_place[i]['mapx'],
+                longtitude = dict_place[i]['mapy'],
+                region = region_id
+            )
+
+            place = {}
+
+    
+    else:
+        print("Error Code:" + rescode)
+
+    return place_list
+
+@api_view(['GET'])
+def recommend_place(request, type=None):
+    # encode_type = 'json'
+    # sort = 'sin'   # 관련도순
+
+    ##### 비로그인 유저 ######
+    personal_type = request.GET.get('person_type')
+    preference = request.GET.get('preference')
+
+    ##### 로그인 유저 ######
+    user = request.user
+    loginUser = User.objects.get('')
+    personal_type = user.personal_type
+    preference = user.preference
+
+    search_region = request.GET.get('name')
+
+    search_food = search_region + (" 음식점")
+    search_food = urllib.parse.quote(search_food)
+    search_cafe =  search_region + (" 카페")
+    search_cafe = urllib.parse.quote(search_cafe)
+    search_spot = search_region + (" 명소")
+    search_spot = urllib.parse.quote(search_spot)
+    
+    # print("response = " + str(response))
+    response_dict = {}
+    response_dict.update(get_place_info(search_food))
+    response_dict.update(get_place_info(search_cafe))
+    response_dict.update(get_place_info(search_spot))
+
+    print(response_dict)
+
+    
+
