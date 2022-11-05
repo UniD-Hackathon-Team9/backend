@@ -77,6 +77,9 @@ def recommend_place(request, type=None):
         personal_type = request.GET.get('person_type')
         preference = request.GET.get('preference')
 
+
+    ########### 추천 알고리즘 #################
+
     search_region = request.GET.get('name')
 
     search_food = search_region + (" 음식점")
@@ -99,7 +102,7 @@ def recommend_place(request, type=None):
 
 
 
-
+#################################################################################################3
 
 class DataListAPI(viewsets.ModelViewSet):
     def get(self, request):
