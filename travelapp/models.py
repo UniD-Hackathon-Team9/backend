@@ -1,94 +1,53 @@
 from django.db import models
 
-from django.contrib.auth.models import BaseUserManager ,AbstractBaseUser
+TRAVEL_TYPE = (
+    ('A', 'ROCK'),
+    ('B', 'ORANGE'),
+    ('C', 'SUNSET'),
+    ('D', 'PIG'),
+    ('E', 'FLOWER')
+)
 
-
-class UserManager(BaseUserManager):
-    use_in_migrations: True
-
-    def create_user(self, password, email, travel_type,  **kwargs):
-       
-        if not email:
-            raise ValueError('must have user email')
- 
-        user = self.model(
-        
-            password = password,
-            email = self.normalize_email(email),
-            travel_type = travel_type
-        )
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, password, email, travel_type, **extra_fields):
-
-        superuser = self.create_user(
-            password = password,
-            email = email,
-            travel_type = travel_type,
-
-            )
-
-        superuser.is_staff = True
-        superuser.is_superuser = True
-        superuser.is_active = True
-        superuser.save(using=self._db)
-        return superuser
-    
-    
-class User(AbstractBaseUser):
-    
-    password = models.TextField(unique=True, blank=False, null=False, max_length=15, default='')
-    email = models.CharField(unique=True, blank=False, null=False, max_length=255)
-    travel_type = models.CharField(unique=True, blank=False, null=False, max_length=255)
-    # one to many : models.ForeignKey
-    
-    is_active = models.BooleanField(default=True)    
-    is_admin = models.BooleanField(default=False)
-    
-    # 헬퍼 클래스 사용
-    objects = UserManager()
-
-    # 사용자의 username field는 nickname으로 설정
-    USERNAME_FIELD = 'email'
-    # 필수로 작성해야하는 field
-    REQUIRED_FIELDS = ['email', 'password']
-
-    def __str__(self):
-        return self.password
-    
-    
-    class Meta:
-        db_table = 'user'
-
+PLACE_TYPE = (
+    ('FOOD', 'FOOD'),
+    ('CAFE', 'CAFE'),
+    ('SPOT', 'SPOT')
+)
 
 # Create your models here.
 class Region(models.Model):
-    name = models.CharField(max_length=20)
-    region_large = models.CharField(max_length=20)
-    latitude = models.IntegerField()
-    longtitude = models.IntegerField()
+    region_small = models.CharField(unique=True, max_length=20, null=False)   # address [1]
+    region_large = models.CharField(max_length=20, null=False)   # address [0]
 
     def __str__(self):
-        return self.name
-        
-class PlaceType(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
-
+        return self.region_large
 
 class Place(models.Model):
-    name = models.CharField(max_length=30)
-    description = models.TextField()
-    latitude = models.IntegerField()
-    longtitude = models.IntegerField()
-    place_type = models.ForeignKey(PlaceType, verbose_name="place_type", on_delete=models.CASCADE)
+    name = models.CharField(unique=True, max_length=30, null=False)
+    placeType = models.CharField(choices=PLACE_TYPE, max_length=10, default='FOOD')
+    latitude = models.IntegerField(null=False)
+    address = models.TextField(null=True, default="")
+    longtitude = models.IntegerField(null=False)
     region = models.ForeignKey(Region, verbose_name="region", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
+class PlaceImage(models.Model):
+    place = models.ForeignKey(Place, verbose_name="place", on_delete=models.CASCADE)
+    src = models.URLField(null=True, blank=True)
+    index = models.IntegerField(null=True, default=1)
     
+    def __str__(self):
+        return self.src
+
+class PlaceTag(models.Model):
+    name = models.TextField()
+    def __str__(self):
+        return self.name
+
+class TagToPlace(models.Model):
+    place_id = models.ForeignKey(Place, verbose_name="place_id", on_delete=models.CASCADE)
+    tag_id = models.ForeignKey(PlaceTag, verbose_name="tag_id", on_delete=models.CASCADE)
+    def __str__(self):
+        return self.name
