@@ -1,8 +1,11 @@
 from django.urls import path
-from . import views
-
-app_name = 'travelapp'
+from django.urls import re_path as url
+from rest_framework.urlpatterns import format_suffix_patterns
+from travelapp import views
+# from . import views
 
 urlpatterns = [
-    # path('', ),
+    url(r'^$', views.recommend_place),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
